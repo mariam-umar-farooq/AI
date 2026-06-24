@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Export Test — Module Activities</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF;
+    --surface: #FFFFFF;
+    --ink: #1A1A1A;
+    --ink-light: #6B6560;
+    --accent: #2D6A4F;
+    --accent-light: #D8F3DC;
+    --border: #E2DDD8;
+    --amber: #D4870A;
+    --amber-light: #FFF3CD;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+
+  .container { max-width: 640px; margin: 0 auto; }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--ink-light);
+    line-height: 1.65;
+    margin-bottom: 32px;
+  }
+
+  .q-block { margin-bottom: 22px; }
+
+  .q-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .q-hint {
+    font-size: 12px;
+    color: var(--ink-light);
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+
+  textarea {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: #C5BFB9; }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 20px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #235C40; }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--ink);
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 99px;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="tag">Module 1 · Activity 1 of 4</div>
+  <h1>A Problem That Keeps Coming Back</h1>
+  <p class="subtitle">Fill in your responses below, then click "Download as PDF" to save a clean copy.</p>
+
+  <div class="q-block">
+    <div class="q-label">🔍 What is the problem?</div>
+    <div class="q-hint">Describe it in a sentence or two</div>
+    <textarea id="f1" placeholder="e.g. Many young people in my city can't find stable employment…" oninput="autosave()"></textarea>
+  </div>
+
+  <div class="q-block">
+    <div class="q-label">🔄 What solutions have already been tried?</div>
+    <textarea id="f2" placeholder="e.g. Job fairs, internship schemes, government subsidies…" oninput="autosave()"></textarea>
+  </div>
+
+  <div class="q-block">
+    <div class="q-label">🤔 Why do you think they haven't fully worked?</div>
+    <textarea id="f3" placeholder="Your honest instinct is enough here…" oninput="autosave()"></textarea>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="downloadPDF()">↓ Download as PDF</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ Draft saved</div>
+
+<script>
+  let saveTimer = null;
+
+  function autosave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => showToast('✓ Draft saved'), 800);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  function downloadPDF() {
+    const f1 = document.getElementById('f1').value.trim();
+    const f2 = document.getElementById('f2').value.trim();
+    const f3 = document.getElementById('f3').value.trim();
+
+    if (!f1 && !f2 && !f3) {
+      showToast('Fill in some answers first');
+      return;
+    }
+
+    const date = new Date().toLocaleDateString('en-GB', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    });
+
+    // Build a clean, print-optimised HTML page
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Module 1 — My Responses</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', Georgia, serif;
+    color: #1A1A1A;
+    background: white;
+    padding: 48px 52px;
+    max-width: 680px;
+    margin: 0 auto;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* Header */
+  .header {
+    border-bottom: 2px solid #2D6A4F;
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+  }
+
+  .course-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #2D6A4F;
+    margin-bottom: 6px;
+  }
+
+  .doc-title {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 24px;
+    color: #1A1A1A;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .doc-meta {
+    font-size: 12px;
+    color: #6B6560;
+  }
+
+  /* Section heading */
+  .section-heading {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #2D6A4F;
+    margin: 28px 0 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #E2DDD8;
+  }
+
+  /* Answer block */
+  .answer-block {
+    margin-bottom: 22px;
+    page-break-inside: avoid;
+  }
+
+  .answer-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin-bottom: 6px;
+  }
+
+  .answer-text {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.7;
+    background: #F7F4EF;
+    border-left: 3px solid #2D6A4F;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .answer-empty {
+    font-size: 12px;
+    color: #C5BFB9;
+    font-style: italic;
+    padding: 8px 0;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid #E2DDD8;
+    font-size: 11px;
+    color: #6B6560;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-logo {
+    font-weight: 600;
+    color: #2D6A4F;
+    font-size: 11px;
+  }
+
+  /* Print instructions banner — only shown on screen, not in PDF */
+  .print-banner {
+    background: #D8F3DC;
+    border: 1.5px solid #2D6A4F;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 32px;
+    font-size: 13px;
+    color: #1B4332;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .print-banner strong { font-weight: 600; }
+
+  .print-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 7px;
+    border: none;
+    background: #2D6A4F;
+    color: white;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Hide print banner when printing */
+  @media print {
+    .print-banner { display: none !important; }
+    body { padding: 0; }
+  }
+
+  @page {
+    margin: 2cm;
+    size: A4;
+  }
+</style>
+</head>
+<body>
+
+<div class="print-banner">
+  <span>📄 <strong>Save as PDF:</strong> Click the button → your browser's print dialog will open → select "Save as PDF" as the destination.</span>
+  <button class="print-btn" onclick="window.print()">Save as PDF</button>
+</div>
+
+<div class="header">
+  <div class="course-tag">Designing Social Impact · ERUA Social Entrepreneurship e-Course</div>
+  <div class="doc-title">Module 1 — My Responses</div>
+  <div class="doc-meta">Activity 1 of 4 · A Problem That Keeps Coming Back · ${date}</div>
+</div>
+
+<div class="section-heading">Activity 1 — A Problem That Keeps Coming Back</div>
+
+<div class="answer-block">
+  <div class="answer-label">🔍 What is the problem?</div>
+  ${f1 ? `<div class="answer-text">${f1.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : '<div class="answer-empty">Not answered</div>'}
+</div>
+
+<div class="answer-block">
+  <div class="answer-label">🔄 What solutions have already been tried?</div>
+  ${f2 ? `<div class="answer-text">${f2.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : '<div class="answer-empty">Not answered</div>'}
+</div>
+
+<div class="answer-block">
+  <div class="answer-label">🤔 Why do you think they haven't fully worked?</div>
+  ${f3 ? `<div class="answer-text">${f3.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : '<div class="answer-empty">Not answered</div>'}
+</div>
+
+<div class="footer">
+  <div class="footer-logo">ERUA Social Entrepreneurship e-Course</div>
+  <div>Prepared by Mariam Umar Farooq, ERUA WP6 · CC BY-NC 4.0</div>
+</div>
+
+<script>
+  // Auto-trigger print dialog when page loads
+  window.addEventListener('load', function() {
+    setTimeout(() => window.print(), 600);
+  });
+<\/script>
+</body>
+</html>`;
+
+    // Open in new tab
+    let opened = false;
+    try {
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, '_blank');
+      if (win) {
+        opened = true;
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      }
+    } catch(e) {}
+
+    if (!opened) {
+      try {
+        const win = window.open('data:text/html;charset=utf-8,' + encodeURIComponent(html), '_blank');
+        if (win) opened = true;
+      } catch(e) {}
+    }
+
+    if (opened) {
+      showToast('✓ Print dialog opening — select "Save as PDF"');
+    } else {
+      showToast('⚠ Pop-ups blocked — allow pop-ups and try again');
+    }
+  }
+</script>
+</body>
+</html>
