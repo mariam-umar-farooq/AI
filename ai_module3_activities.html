@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 — Three Roles AI Can Play</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F0F4FF;--surface:#FFFFFF;--ink:#1A1A2E;--ink-light:#5A6080;--accent:#2D3A8C;--accent-light:#DEE3F8;--border:#D8DCF0;--amber:#D4870A;--amber-light:#FFF3CD;--warn:#E07A5F;--warn-light:#FDE8E3;--green:#2D6A4F;--green-light:#D8F3DC;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--ink);min-height:100vh;}
+  .tab-nav{display:flex;background:var(--surface);border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:100;}
+  .tab-nav::-webkit-scrollbar{display:none;}
+  .tab-btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:14px 18px;border:none;background:none;cursor:pointer;color:var(--ink-light);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;display:flex;align-items:center;gap:6px;}
+  .tab-btn:hover{color:var(--accent);}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .2s;}
+  .tab-btn.done .tab-dot,.tab-btn.active .tab-dot{background:var(--accent);}
+  .panel{display:none;padding:32px 24px 60px;max-width:680px;margin:0 auto;}
+  .panel.active{display:block;animation:fadeUp .4s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .panel-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--accent-light);padding:4px 10px;border-radius:4px;margin-bottom:14px;}
+  .panel h2{font-family:'DM Serif Display',serif;font-size:clamp(22px,4vw,30px);line-height:1.2;margin-bottom:10px;}
+  .panel-intro{font-size:14px;color:var(--ink-light);line-height:1.65;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+  .time-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--ink-light);background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:3px 10px;margin-bottom:20px;}
+  .q-block{margin-bottom:22px;}
+  .q-label{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;line-height:1.4;}
+  .q-hint{font-size:12px;color:var(--ink-light);margin-bottom:8px;line-height:1.5;font-style:italic;}
+  textarea{width:100%;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;color:var(--ink);background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;resize:vertical;min-height:90px;outline:none;transition:border-color .2s,box-shadow .2s;}
+  textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,58,140,.08);}
+  textarea::placeholder{color:#C5BFB9;}
+  .section-divider{border:none;border-top:1px solid var(--border);margin:28px 0;}
+  .callout{background:var(--accent-light);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;font-size:13px;line-height:1.6;color:var(--ink);margin:16px 0 24px;}
+  .callout.amber{background:var(--amber-light);border-color:var(--amber);}
+  .callout.green{background:var(--green-light);border-color:var(--green);}
+  .callout strong{font-weight:600;}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:11px 20px;border-radius:9px;border:none;cursor:pointer;transition:all .2s;}
+  .btn-primary{background:var(--accent);color:white;}.btn-primary:hover{background:#1E2870;transform:translateY(-1px);}
+  .btn-next{background:var(--ink);color:white;}.btn-next:hover{background:#333;}
+  .btn-ghost{background:transparent;color:var(--ink-light);border:1.5px solid var(--border);}.btn-ghost:hover{border-color:var(--ink-light);color:var(--ink);}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--ink);color:white;font-size:13px;font-weight:500;padding:10px 20px;border-radius:99px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .progress-bar-wrap{height:3px;background:var(--border);width:100%;}
+  .progress-bar-fill{height:100%;background:var(--accent);transition:width .4s ease;}
+  .completion-banner{background:var(--green-light);border:1.5px solid var(--green);border-radius:12px;padding:20px 24px;text-align:center;display:none;margin-bottom:24px;}
+  .completion-banner.show{display:block;animation:fadeUp .4s ease both;}
+  .completion-banner h3{font-family:'DM Serif Display',serif;font-size:22px;color:var(--green);margin-bottom:6px;}
+  .completion-banner p{font-size:13px;color:var(--green);line-height:1.5;}
+  .stack-layer{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:border-color .2s;}
+  .stack-layer:focus-within{border-color:var(--accent);}
+  .layer-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .layer-num{font-size:11px;font-weight:700;color:white;background:var(--accent);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .layer-name{font-size:13px;font-weight:600;color:var(--ink);}
+  .layer-example{font-size:11px;color:var(--ink-light);margin-bottom:8px;font-style:italic;}
+  .stack-layer textarea{background:var(--bg);border-color:transparent;min-height:55px;}
+  .stack-layer textarea:focus{background:var(--surface);border-color:var(--accent);box-shadow:none;}
+  .role-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;transition:border-color .2s;}
+  .role-card:focus-within{border-color:var(--accent);}
+  .role-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;margin-bottom:8px;}
+  .role-badge.supportive{background:#FFF3CD;color:#78500A;}
+  .role-badge.integral{background:#DEE3F8;color:#2D3A8C;}
+  .role-badge.core{background:#FDE8E3;color:#C0392B;}
+  .role-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+  .role-card textarea{background:var(--bg);border-color:transparent;min-height:65px;}
+  .role-card textarea:focus{background:var(--surface);border-color:var(--accent);box-shadow:none;}
+  .impact-row{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:border-color .2s;}
+  .impact-row:focus-within{border-color:var(--accent);}
+  .impact-theme{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+  .impact-question{font-size:11px;color:var(--ink-light);margin-bottom:10px;font-style:italic;}
+  .impact-row textarea{background:var(--bg);border-color:transparent;min-height:55px;font-size:12px;}
+  .impact-row textarea:focus{background:var(--surface);border-color:var(--accent);box-shadow:none;}
+  .checklist-item{display:flex;align-items:flex-start;gap:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
+  .checklist-item.checked{border-color:var(--green);background:var(--green-light);}
+  .check-box{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:12px;}
+  .checklist-item.checked .check-box{background:var(--green);border-color:var(--green);color:white;}
+  .check-text{font-size:13px;line-height:1.5;color:var(--ink);flex:1;}
+  .checklist-item.checked .check-text{color:#1B4332;}
+  .footer-note{text-align:center;font-size:11px;color:var(--ink-light);padding:20px 24px;border-top:1px solid var(--border);}
+  .pdf-overlay{display:none;position:fixed;inset:0;background:white;z-index:9999;overflow-y:auto;}
+  .pdf-overlay.show{display:block;}
+  .pdf-toolbar{background:#48F89B;color:#0D3D24;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10;border-bottom:2px solid #1AC978;}
+  .pdf-toolbar-logo{height:28px;width:auto;flex-shrink:0;}
+  .pdf-toolbar-text{font-size:12px;font-weight:500;line-height:1.4;flex:1;color:#0D3D24;}
+  .pdf-toolbar-text strong{font-weight:700;}.pdf-toolbar-text em{font-style:italic;font-weight:600;}
+  .pdf-toolbar-actions{display:flex;gap:8px;flex-shrink:0;}
+  .btn-print{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;padding:7px 14px;border-radius:7px;border:2px solid #0D3D24;background:#0D3D24;color:#48F89B;cursor:pointer;}
+  .btn-close-pdf{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 12px;border-radius:7px;border:1.5px solid rgba(13,61,36,0.4);background:transparent;color:#0D3D24;cursor:pointer;}
+  .pdf-content{max-width:680px;margin:0 auto;padding:40px 48px 60px;}
+  .pdf-header{border-bottom:2px solid #48F89B;padding-bottom:16px;margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+  .pdf-header-text{flex:1;}.pdf-header-logo{height:36px;width:auto;flex-shrink:0;}
+  .pdf-course-tag{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#1AC978;margin-bottom:6px;}
+  .pdf-title{font-family:'DM Serif Display',serif;font-size:22px;color:#1A1A1A;line-height:1.2;margin-bottom:4px;}
+  .pdf-meta{font-size:12px;color:#6B6560;}
+  .pdf-section-heading{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#1AC978;margin:24px 0 12px;padding-bottom:6px;border-bottom:1px solid #E2DDD8;}
+  .pdf-answer-block{margin-bottom:20px;page-break-inside:avoid;}
+  .pdf-answer-label{font-size:12px;font-weight:600;color:#1A1A1A;margin-bottom:6px;}
+  .pdf-answer-text{font-size:13px;color:#333;line-height:1.7;background:#F0FFF7;border-left:3px solid #48F89B;padding:10px 14px;border-radius:0 6px 6px 0;white-space:pre-wrap;word-wrap:break-word;}
+  .pdf-footer{margin-top:40px;padding-top:14px;border-top:1px solid #E2DDD8;font-size:11px;color:#6B6560;display:flex;justify-content:space-between;align-items:center;}
+  .pdf-footer-logo{height:18px;width:auto;}
+  @media print{*{visibility:hidden;}.pdf-overlay,.pdf-overlay *{visibility:visible;}.pdf-overlay{position:fixed;inset:0;overflow:visible;background:white;}.pdf-toolbar{display:none !important;}.pdf-content{padding:24px 48px;max-width:100%;}@page{margin:1.5cm;size:A4;}}
+</style>
+</head>
+<body>
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:33%"></div></div>
+<div class="tab-nav"><button class="tab-btn active" id="tab-0" onclick="showTab(0)"><span class="tab-dot"></span> 1 · Warm-up</button>
+  <button class="tab-btn " id="tab-1" onclick="showTab(1)"><span class="tab-dot"></span> 2 · Integration Level</button>
+  <button class="tab-btn " id="tab-2" onclick="showTab(2)"><span class="tab-dot"></span> 3 · Three Roles</button></div>
+
+<div class="panel active" id="panel-0">
+  <div class="panel-tag">Module 3 · Activity 1 of 3</div>
+  <h2>Your First Instinct on Role</h2>
+  <div class="time-badge">⏱ About 5 minutes</div>
+  <p class="panel-intro">Before reading the framework, trust your instinct. Think about the organisation or venture you have in mind for this course.</p>
+  <div class="q-block">
+    <div class="q-label">🎯 If AI were introduced into your venture tomorrow, what would you want it to do first?</div>
+    <div class="q-hint">Don't think about what's realistic — just your honest first instinct</div>
+    <textarea id="w1" placeholder="The first thing I'd want AI to do is…" oninput="autosave()"></textarea>
+  </div>
+  <div class="q-block">
+    <div class="q-label">🔍 Would that make AI a background support, a service enhancer, or the core of your impact?</div>
+    <textarea id="w2" placeholder="I think it would be… because…" oninput="autosave()"></textarea>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveAndExport()">↓ Save as PDF</button>
+    <button class="btn btn-next" onclick="showTab(1)">Next →</button>
+  </div>
+</div>
+
+<div class="panel" id="panel-1">
+  <div class="panel-tag">Module 3 · Activity 2 of 3</div>
+  <h2>Integration Level Self-Assessment</h2>
+  <div class="time-badge">⏱ About 8–10 minutes</div>
+  <p class="panel-intro">The integration pyramid runs from T (Tool — using ready-made apps) to IP (Intellectual Property — building your own neural networks). For each level, reflect on where your venture currently is and where it could realistically go.</p>
+  <div class="role-card">
+    <div class="role-badge supportive">T — Tool</div>
+    <div class="role-name">Using ready-made AI tools — no coding required</div>
+    <textarea id="i1" placeholder="Tools I currently use at this level, or could use… e.g. ChatGPT for grant writing, Canva for design…" oninput="autosave()"></textarea>
+  </div>
+  <div class="role-card">
+    <div class="role-badge integral">API — Integration</div>
+    <div class="role-name">Connecting AI via APIs to automate workflows</div>
+    <textarea id="i2" placeholder="Is this realistic for my venture? What would it look like?…" oninput="autosave()"></textarea>
+  </div>
+  <div class="role-card">
+    <div class="role-badge integral">AIP — Configurable AI</div>
+    <div class="role-name">Customising AI models with your own data</div>
+    <textarea id="i3" placeholder="What data would I use? What mission-specific insights would I need?…" oninput="autosave()"></textarea>
+  </div>
+  <div class="role-card">
+    <div class="role-badge core">PAI / IP — Proprietary or Custom AI</div>
+    <div class="role-name">Building your own ML models or neural networks</div>
+    <textarea id="i4" placeholder="Is this level appropriate for my venture — now or in the future? What would need to change?…" oninput="autosave()"></textarea>
+  </div>
+  <div class="q-block" style="margin-top:20px;">
+    <div class="q-label">📍 Where does your venture realistically sit right now — and where should it aim in 2 years?</div>
+    <textarea id="i5" placeholder="Right now we are at level… In 2 years I think we could realistically reach… because…" oninput="autosave()"></textarea>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveAndExport()">↓ Save as PDF</button>
+    <button class="btn btn-next" onclick="showTab(2)">Next →</button>
+    <button class="btn btn-ghost" onclick="showTab(0)">← Back</button>
+  </div>
+</div>
+
+<div class="panel" id="panel-2">
+  <div class="panel-tag">Module 3 · Activity 3 of 3</div>
+  <h2>Three Roles — Map Your Venture</h2>
+  <div class="time-badge">⏱ About 10 minutes</div>
+  <p class="panel-intro">Now apply the three roles framework directly to your venture. For each role, describe what AI at that level would look like — and whether it makes sense.</p>
+  <div class="role-card">
+    <div class="role-badge supportive">Supportive</div>
+    <div class="role-name">Background — AI streamlines internal processes</div>
+    <textarea id="r1" placeholder="At the Supportive level, AI could help us with… e.g. drafting emails, translating documents, scheduling…" oninput="autosave(); checkCompletion()"></textarea>
+  </div>
+  <div class="role-card">
+    <div class="role-badge integral">Integral</div>
+    <div class="role-name">Enhancing — AI adds value to services or products</div>
+    <textarea id="r2" placeholder="At the Integral level, AI could improve our service by… e.g. personalising support, matching participants, scaling outreach…" oninput="autosave()"></textarea>
+  </div>
+  <div class="role-card">
+    <div class="role-badge core">Core</div>
+    <div class="role-name">Essential — the venture depends entirely on AI</div>
+    <textarea id="r3" placeholder="A Core-level AI venture in our field might look like… Should our venture go there — why or why not?…" oninput="autosave()"></textarea>
+  </div>
+  <div class="q-block" style="margin-top:20px;">
+    <div class="q-label">✅ Which role is right for your venture — and what is the shift you would need to make to move one level deeper?</div>
+    <div class="q-hint">Think about what would need to grow, change, or be added — in you, your team, or your environment</div>
+    <textarea id="r4" placeholder="The right role for us right now is… To go one level deeper we would need…" oninput="autosave()"></textarea>
+  </div>
+  <div class="completion-banner" id="completionBanner">
+    <h3>✓ Module 3 complete</h3>
+    <p>You've assessed your integration level, mapped all three roles to your venture, and identified what shift would move you deeper.</p>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveAndExport()">↓ Save as PDF</button>
+    <button class="btn btn-ghost" onclick="showTab(1)">← Back</button>
+  </div>
+</div>
+<div class="pdf-overlay" id="pdfOverlay">
+  <div class="pdf-toolbar">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEcAAABkCAMAAADjVt21AAAACXBIWXMAAAsSAAALEgHS3X78AAAAM1BMVEVHcExI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JsXaIzrAAAAEHRSTlMAMCBAYBDggMDwkNCgULBwaiguQQAAAWtJREFUWMPt2G1ugzAMBuCGfDmBdr7/aYdUdYUBwdjvtvyYD/BIMY5jc7v1GCGLIvgTh1gaY3UQZ46UI8RhLkfSRWeWPjAOM0WMw8VhHC4B4zAHkMMO5JQB4/AIcjiDnHWKDA6BHPYgh0AODyCngpwEchYHszkB5FSQQyBnBDn87/yKM3ZWP7Wz+zX01X9qX/2Z+nq/qK/3PXc1/6DmMdfTvAqan0HzPGa/2DnTn+1fkH2wvZ+29uW0SIpXb+T31Ko7afj1gUtUKY4aLV0cw9Tu6bKI03kXFSi5HHz3+xXmUJmLUJ7qkOQNWVgwrE21P78hD03BnD2g4oJpzynygrmY6tj41Ns2FhUFsxeTpmDEqU7mZ/0ZkJdU6eyl2jqkmhx2IIdAzrajadeBiHE21wyxEJicB8j5ds0gm5fJWafa4KyumWWHm0DOMtWgfwk2Z9HRbM471Tbn3dGMzldHszoEcl6pztZQj9U/GJ/PFzeemPqY1wAAAABJRU5ErkJggg==" alt="ERUA" class="pdf-toolbar-logo">
+    <div class="pdf-toolbar-text"><strong>Save as PDF:</strong> Click the button → a print dialog will open → set the destination/output to <em>"Save as PDF"</em> → enable background graphics if prompted → save.</div>
+    <div class="pdf-toolbar-actions">
+      <button class="btn-print" onclick="window.print()">🖨 Save as PDF</button>
+      <button class="btn-close-pdf" onclick="closePDF()">✕ Close</button>
+    </div>
+  </div>
+  <div class="pdf-content" id="pdfContent"></div>
+</div>
+<div class="toast" id="toast">✓ Draft saved</div>
+<div class="footer-note">Strategic AI Integration for Social Ventures · ERUA e-Course Programme</div>
+<script>
+  const fields = {0:['w1','w2'],1:['i1','i2','i3','i4','i5'],2:['r1','r2','r3','r4']};
+  const labels = {'w1':'First instinct — what I would want AI to do first','w2':'Would that be background, enhancing, or core?','i1':'T — Tool level: apps I use or could use','i2':'API level: is this realistic for my venture?','i3':'AIP level: what data would I use?','i4':'PAI/IP level: is building AI appropriate for my venture?','i5':'Where my venture sits now and in 2 years','r1':'Supportive role — what AI could do at this level','r2':'Integral role — how AI could improve services','r3':'Core role — what it would look like, should we go there?','r4':'Which role is right, and what shift would move us deeper?'};
+  const panelTitles = ['Activity 1: First Instinct on Role','Activity 2: Integration Level Self-Assessment','Activity 3: Three Roles — Map Your Venture'];
+  let currentTab=0, saveTimer=null;
+
+  function showTab(i) {
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('panel-'+i).classList.add('active');
+    document.getElementById('tab-'+i).classList.add('active');
+    currentTab=i;
+    document.getElementById('progressBar').style.width=((i+1)/3*100)+'%';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function autosave() { clearTimeout(saveTimer); saveTimer=setTimeout(()=>showToast('✓ Draft saved'),800); }
+
+  function showToast(msg) {
+    const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2000);
+  }
+
+  function checkCompletion() {
+    if (document.getElementById('r1')?.value.trim()) {
+      document.getElementById('completionBanner').classList.add('show');
+      document.getElementById('tab-2').classList.add('done');
+    }
+  }
+
+  function saveAndExport() {
+    const allIds = Object.values(fields).flat();
+    if (!allIds.some(id=>document.getElementById(id)?.value.trim())) { showToast('Fill in some answers first'); return; }
+    const date = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    let sectionsHTML = '';
+    Object.entries(fields).forEach(([tab,ids])=>{
+      const items=ids.map(id=>{
+        const v=document.getElementById(id)?.value.trim();
+        if(!v) return '';
+        return `<div class="pdf-answer-block"><div class="pdf-answer-label">${labels[id]||id}</div><div class="pdf-answer-text">${v.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`;
+      }).filter(Boolean).join('');
+      if(items) sectionsHTML+=`<div class="pdf-section-heading">${panelTitles[tab]}</div>${items}`;
+    });
+    document.getElementById('pdfContent').innerHTML=`
+      <div class="pdf-header">
+        <div class="pdf-header-text">
+          <div class="pdf-course-tag">ERUA e-Course · Strategic AI Integration for Social Ventures</div>
+          <div class="pdf-title">Module 3 — Three Roles AI Can Play</div>
+          <div class="pdf-meta">${date}</div>
+        </div>
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEcAAABkCAMAAADjVt21AAAACXBIWXMAAAsSAAALEgHS3X78AAAAM1BMVEVHcExI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JsXaIzrAAAAEHRSTlMAMCBAYBDggMDwkNCgULBwaiguQQAAAWtJREFUWMPt2G1ugzAMBuCGfDmBdr7/aYdUdYUBwdjvtvyYD/BIMY5jc7v1GCGLIvgTh1gaY3UQZ46UI8RhLkfSRWeWPjAOM0WMw8VhHC4B4zAHkMMO5JQB4/AIcjiDnHWKDA6BHPYgh0AODyCngpwEchYHszkB5FSQQyBnBDn87/yKM3ZWP7Wz+zX01X9qX/2Z+nq/qK/3PXc1/6DmMdfTvAqan0HzPGa/2DnTn+1fkH2wvZ+29uW0SIpXb+T31Ko7afj1gUtUKY4aLV0cw9Tu6bKI03kXFSi5HHz3+xXmUJmLUJ7qkOQNWVgwrE21P78hD03BnD2g4oJpzynygrmY6tj41Ns2FhUFsxeTpmDEqU7mZ/0ZkJdU6eyl2jqkmhx2IIdAzrajadeBiHE21wyxEJicB8j5ds0gm5fJWafa4KyumWWHm0DOMtWgfwk2Z9HRbM471Tbn3dGMzldHszoEcl6pztZQj9U/GJ/PFzeemPqY1wAAAABJRU5ErkJggg==" alt="ERUA" class="pdf-header-logo">
+      </div>
+      ${sectionsHTML}
+      <div class="pdf-footer">
+        <span>Strategic AI Integration for Social Ventures · ERUA e-Course Programme</span>
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEcAAABkCAMAAADjVt21AAAACXBIWXMAAAsSAAALEgHS3X78AAAAM1BMVEVHcExI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JsXaIzrAAAAEHRSTlMAMCBAYBDggMDwkNCgULBwaiguQQAAAWtJREFUWMPt2G1ugzAMBuCGfDmBdr7/aYdUdYUBwdjvtvyYD/BIMY5jc7v1GCGLIvgTh1gaY3UQZ46UI8RhLkfSRWeWPjAOM0WMw8VhHC4B4zAHkMMO5JQB4/AIcjiDnHWKDA6BHPYgh0AODyCngpwEchYHszkB5FSQQyBnBDn87/yKM3ZWP7Wz+zX01X9qX/2Z+nq/qK/3PXc1/6DmMdfTvAqan0HzPGa/2DnTn+1fkH2wvZ+29uW0SIpXb+T31Ko7afj1gUtUKY4aLV0cw9Tu6bKI03kXFSi5HHz3+xXmUJmLUJ7qkOQNWVgwrE21P78hD03BnD2g4oJpzynygrmY6tj41Ns2FhUFsxeTpmDEqU7mZ/0ZkJdU6eyl2jqkmhx2IIdAzrajadeBiHE21wyxEJicB8j5ds0gm5fJWafa4KyumWWHm0DOMtWgfwk2Z9HRbM471Tbn3dGMzldHszoEcl6pztZQj9U/GJ/PFzeemPqY1wAAAABJRU5ErkJggg==" alt="ERUA" class="pdf-footer-logo">
+      </div>`;
+    document.getElementById('pdfOverlay').classList.add('show');
+    document.getElementById('pdfOverlay').scrollTop=0;
+  }
+
+  function closePDF() { document.getElementById('pdfOverlay').classList.remove('show'); }
+</script>
+</body>
+</html>
