@@ -1,0 +1,294 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Module 6 — Critical Impacts & Ethics</title><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"><style>
+  :root{--bg:#F0F4FF;--surface:#FFFFFF;--ink:#1A1A2E;--ink-light:#5A6080;--accent:#2D3A8C;--accent-light:#DEE3F8;--border:#D8DCF0;--amber:#D4870A;--amber-light:#FFF3CD;--warn:#E07A5F;--warn-light:#FDE8E3;--green:#2D6A4F;--green-light:#D8F3DC;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--ink);min-height:100vh;}
+  .tab-nav{display:flex;background:var(--surface);border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:100;}
+  .tab-nav::-webkit-scrollbar{display:none;}
+  .tab-btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:14px 18px;border:none;background:none;cursor:pointer;color:var(--ink-light);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;display:flex;align-items:center;gap:6px;}
+  .tab-btn:hover{color:var(--accent);}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .2s;}
+  .tab-btn.done .tab-dot,.tab-btn.active .tab-dot{background:var(--accent);}
+  .panel{display:none;padding:32px 24px 60px;max-width:680px;margin:0 auto;}
+  .panel.active{display:block;animation:fadeUp .4s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .panel-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--accent-light);padding:4px 10px;border-radius:4px;margin-bottom:14px;}
+  .panel h2{font-family:'DM Serif Display',serif;font-size:clamp(22px,4vw,30px);line-height:1.2;margin-bottom:10px;}
+  .panel-intro{font-size:14px;color:var(--ink-light);line-height:1.65;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+  .time-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--ink-light);background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:3px 10px;margin-bottom:20px;}
+  .q-block{margin-bottom:22px;}
+  .q-label{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;line-height:1.4;}
+  .q-hint{font-size:12px;color:var(--ink-light);margin-bottom:8px;line-height:1.5;font-style:italic;}
+  textarea{width:100%;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;color:var(--ink);background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;resize:vertical;min-height:90px;outline:none;transition:border-color .2s,box-shadow .2s;}
+  textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,58,140,.08);}
+  textarea::placeholder{color:#C5BFB9;}
+  .section-divider{border:none;border-top:1px solid var(--border);margin:28px 0;}
+  .callout{background:var(--accent-light);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;font-size:13px;line-height:1.6;color:var(--ink);margin:16px 0 24px;}
+  .callout.amber{background:var(--amber-light);border-color:var(--amber);}
+  .callout.green{background:var(--green-light);border-color:var(--green);}
+  .callout strong{font-weight:600;}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:11px 20px;border-radius:9px;border:none;cursor:pointer;transition:all .2s;}
+  .btn-primary{background:var(--accent);color:white;}.btn-primary:hover{background:#1E2870;transform:translateY(-1px);}
+  .btn-next{background:var(--ink);color:white;}.btn-next:hover{background:#333;}
+  .btn-ghost{background:transparent;color:var(--ink-light);border:1.5px solid var(--border);}.btn-ghost:hover{border-color:var(--ink-light);color:var(--ink);}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--ink);color:white;font-size:13px;font-weight:500;padding:10px 20px;border-radius:99px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .progress-bar-wrap{height:3px;background:var(--border);width:100%;}
+  .progress-bar-fill{height:100%;background:var(--accent);transition:width .4s ease;}
+  .completion-banner{background:var(--green-light);border:1.5px solid var(--green);border-radius:12px;padding:20px 24px;text-align:center;display:none;margin-bottom:24px;}
+  .completion-banner.show{display:block;animation:fadeUp .4s ease both;}
+  .completion-banner h3{font-family:'DM Serif Display',serif;font-size:22px;color:var(--green);margin-bottom:6px;}
+  .completion-banner p{font-size:13px;color:var(--green);line-height:1.5;}
+  .stack-layer{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:border-color .2s;}
+  .stack-layer:focus-within{border-color:var(--accent);}
+  .layer-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .layer-num{font-size:11px;font-weight:700;color:white;background:var(--accent);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .layer-name{font-size:13px;font-weight:600;color:var(--ink);}
+  .layer-example{font-size:11px;color:var(--ink-light);margin-bottom:8px;font-style:italic;}
+  .stack-layer textarea{background:var(--bg);border-color:transparent;min-height:55px;}
+  .stack-layer textarea:focus{background:var(--surface);border-color:var(--accent);box-shadow:none;}
+  .role-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;transition:border-color .2s;}
+  .role-card:focus-within{border-color:var(--accent);}
+  .role-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;margin-bottom:8px;}
+  .role-badge.supportive{background:#FFF3CD;color:#78500A;}
+  .role-badge.integral{background:#DEE3F8;color:#2D3A8C;}
+  .role-badge.core{background:#FDE8E3;color:#C0392B;}
+  .role-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+  .role-card textarea{background:var(--bg);border-color:transparent;min-height:65px;}
+  .role-card textarea:focus{background:var(--surface);border-color:var(--accent);box-shadow:none;}
+  .impact-row{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:border-color .2s;}
+  .impact-row:focus-within{border-color:var(--accent);}
+  .impact-theme{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+  .impact-question{font-size:11px;color:var(--ink-light);margin-bottom:10px;font-style:italic;}
+  .impact-row textarea{background:var(--bg);border-color:transparent;min-height:55px;font-size:12px;}
+  .impact-row textarea:focus{background:var(--surface);border-color:var(--accent);box-shadow:none;}
+  .checklist-item{display:flex;align-items:flex-start;gap:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
+  .checklist-item.checked{border-color:var(--green);background:var(--green-light);}
+  .check-box{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:12px;}
+  .checklist-item.checked .check-box{background:var(--green);border-color:var(--green);color:white;}
+  .check-text{font-size:13px;line-height:1.5;color:var(--ink);flex:1;}
+  .checklist-item.checked .check-text{color:#1B4332;}
+  .footer-note{text-align:center;font-size:11px;color:var(--ink-light);padding:20px 24px;border-top:1px solid var(--border);}
+  .pdf-overlay{display:none;position:fixed;inset:0;background:white;z-index:9999;overflow-y:auto;}
+  .pdf-overlay.show{display:block;}
+  .pdf-toolbar{background:#48F89B;color:#0D3D24;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10;border-bottom:2px solid #1AC978;}
+  .pdf-toolbar-logo{height:28px;width:auto;flex-shrink:0;}
+  .pdf-toolbar-text{font-size:12px;font-weight:500;line-height:1.4;flex:1;color:#0D3D24;}
+  .pdf-toolbar-text strong{font-weight:700;}.pdf-toolbar-text em{font-style:italic;font-weight:600;}
+  .pdf-toolbar-actions{display:flex;gap:8px;flex-shrink:0;}
+  .btn-print{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;padding:7px 14px;border-radius:7px;border:2px solid #0D3D24;background:#0D3D24;color:#48F89B;cursor:pointer;}
+  .btn-close-pdf{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 12px;border-radius:7px;border:1.5px solid rgba(13,61,36,0.4);background:transparent;color:#0D3D24;cursor:pointer;}
+  .pdf-content{max-width:680px;margin:0 auto;padding:40px 48px 60px;}
+  .pdf-header{border-bottom:2px solid #48F89B;padding-bottom:16px;margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+  .pdf-header-text{flex:1;}.pdf-header-logo{height:36px;width:auto;flex-shrink:0;}
+  .pdf-course-tag{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#1AC978;margin-bottom:6px;}
+  .pdf-title{font-family:'DM Serif Display',serif;font-size:22px;color:#1A1A1A;line-height:1.2;margin-bottom:4px;}
+  .pdf-meta{font-size:12px;color:#6B6560;}
+  .pdf-section-heading{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#1AC978;margin:24px 0 12px;padding-bottom:6px;border-bottom:1px solid #E2DDD8;}
+  .pdf-answer-block{margin-bottom:20px;page-break-inside:avoid;}
+  .pdf-answer-label{font-size:12px;font-weight:600;color:#1A1A1A;margin-bottom:6px;}
+  .pdf-answer-text{font-size:13px;color:#333;line-height:1.7;background:#F0FFF7;border-left:3px solid #48F89B;padding:10px 14px;border-radius:0 6px 6px 0;white-space:pre-wrap;word-wrap:break-word;}
+  .pdf-footer{margin-top:40px;padding-top:14px;border-top:1px solid #E2DDD8;font-size:11px;color:#6B6560;display:flex;justify-content:space-between;align-items:center;}
+  .pdf-footer-logo{height:18px;width:auto;}
+  @media print{*{visibility:hidden;}.pdf-overlay,.pdf-overlay *{visibility:visible;}.pdf-overlay{position:fixed;inset:0;overflow:visible;background:white;}.pdf-toolbar{display:none !important;}.pdf-content{padding:24px 48px;max-width:100%;}@page{margin:1.5cm;size:A4;}}
+</style></head><body>
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:33%"></div></div>
+<div class="tab-nav"><button class="tab-btn active" id="tab-0" onclick="showTab(0)"><span class="tab-dot"></span> 1 · Warm-up</button>
+  <button class="tab-btn " id="tab-1" onclick="showTab(1)"><span class="tab-dot"></span> 2 · Impact Assessment</button>
+  <button class="tab-btn " id="tab-2" onclick="showTab(2)"><span class="tab-dot"></span> 3 · Responsible AI Checklist</button></div>
+
+<div class="panel active" id="panel-0">
+  <div class="panel-tag">Module 6 · Activity 1 of 3</div>
+  <h2>Warm-up — What Shift Would Move You Deeper?</h2>
+  <div class="time-badge">⏱ About 5 minutes</div>
+  <p class="panel-intro">Module 6 closes the course by asking the hardest question: not what AI can do, but what you are ready to take responsibility for. Start by reflecting on where you are.</p>
+  <div class="q-block">
+    <div class="q-label">📍 Looking back at the five modules: where does your venture currently sit in terms of AI integration — level and role?</div>
+    <textarea id="w1" placeholder="My venture currently uses AI at… level in a… role because…" oninput="autosave()"></textarea>
+  </div>
+  <div class="q-block">
+    <div class="q-label">🚀 What shift would move you one level deeper — and are you ready for the responsibility that comes with it?</div>
+    <div class="q-hint">Think about what would need to grow, change, or be added in you, your team, or your environment</div>
+    <textarea id="w2" placeholder="To move one level deeper I would need… I am / am not ready because…" oninput="autosave()"></textarea>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveAndExport()">↓ Save as PDF</button>
+    <button class="btn btn-next" onclick="showTab(1)">Next →</button>
+  </div>
+</div>
+
+<div class="panel" id="panel-1">
+  <div class="panel-tag">Module 6 · Activity 2 of 3</div>
+  <h2>Critical Impacts Self-Assessment</h2>
+  <div class="time-badge">⏱ About 12 minutes</div>
+  <p class="panel-intro">For each of the eight critical impact areas, reflect honestly on what it means for your venture. No impact area is irrelevant — even if it feels distant now.</p>
+  <div class="impact-row">
+    <div class="impact-theme">1. Data & Network Effects</div>
+    <div class="impact-question">Who controls the data? Is your solution dependent on big platforms?</div>
+    <textarea id="i1" placeholder="For our venture, the data question means…" oninput="autosave()"></textarea>
+  </div>
+  <div class="impact-row">
+    <div class="impact-theme">2. Trust</div>
+    <div class="impact-question">Can users rely on or understand the AI?</div>
+    <textarea id="i2" placeholder="Our beneficiaries would/wouldn't trust AI because…" oninput="autosave()"></textarea>
+  </div>
+  <div class="impact-row">
+    <div class="impact-theme">3. Augmentation vs. Automation</div>
+    <div class="impact-question">Does AI empower or replace humans in our work?</div>
+    <textarea id="i3" placeholder="In our context, AI should augment/replace… because…" oninput="autosave()"></textarea>
+  </div>
+  <div class="impact-row">
+    <div class="impact-theme">4. Ethics & Algorithms</div>
+    <div class="impact-question">Is our AI fair, explainable, and accountable?</div>
+    <textarea id="i4" placeholder="The bias or fairness risk most relevant to our context is…" oninput="autosave()"></textarea>
+  </div>
+  <div class="impact-row">
+    <div class="impact-theme">5. Cultural Bias</div>
+    <div class="impact-question">Whose values are embedded in the AI tools we use?</div>
+    <textarea id="i5" placeholder="The cultural assumptions in the AI we use may affect our community by…" oninput="autosave()"></textarea>
+  </div>
+  <div class="impact-row">
+    <div class="impact-theme">6. Decision Making</div>
+    <div class="impact-question">Which decisions should AI never make for us?</div>
+    <textarea id="i6" placeholder="AI should never make decisions about… in our context because…" oninput="autosave()"></textarea>
+  </div>
+  <div class="impact-row">
+    <div class="impact-theme">7. Environmental Impact</div>
+    <div class="impact-question">Is the energy cost of our AI use proportionate to the benefit?</div>
+    <textarea id="i7" placeholder="The environmental footprint of our AI use is… I think this is/isn't proportionate because…" oninput="autosave()"></textarea>
+  </div>
+  <div class="impact-row">
+    <div class="impact-theme">8. Predictability</div>
+    <div class="impact-question">Does AI reduce our openness to the unexpected?</div>
+    <textarea id="i8" placeholder="The risk of over-relying on AI predictions in our work is…" oninput="autosave()"></textarea>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveAndExport()">↓ Save as PDF</button>
+    <button class="btn btn-next" onclick="showTab(2)">Next →</button>
+    <button class="btn btn-ghost" onclick="showTab(0)">← Back</button>
+  </div>
+</div>
+
+<div class="panel" id="panel-2">
+  <div class="panel-tag">Module 6 · Activity 3 of 3</div>
+  <h2>Responsible AI Checklist</h2>
+  <div class="time-badge">⏱ About 8 minutes</div>
+  <p class="panel-intro">Before deploying any AI system in a social venture context, these eight questions should be answered. Check each one you can currently answer clearly — and note what you still need to work out.</p>
+
+  <div id="checklist">
+    <div class="checklist-item" onclick="toggleCheck(this,'ck1')">
+      <div class="check-box" id="ck1">✓</div>
+      <div class="check-text"><strong>1. Who benefits — and who bears the risk?</strong> I have honestly mapped who gains from our AI use and who carries the risk.</div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this,'ck2')">
+      <div class="check-box" id="ck2">✓</div>
+      <div class="check-text"><strong>2. Whose data — and on whose terms?</strong> I know where our data comes from, who owns it, and the consent conditions.</div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this,'ck3')">
+      <div class="check-box" id="ck3">✓</div>
+      <div class="check-text"><strong>3. Can it be explained?</strong> I can explain to a beneficiary in plain language how the AI made a decision that affected them.</div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this,'ck4')">
+      <div class="check-box" id="ck4">✓</div>
+      <div class="check-text"><strong>4. Who is accountable when it goes wrong?</strong> A specific named person in our team is responsible for the AI system's outputs.</div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this,'ck5')">
+      <div class="check-box" id="ck5">✓</div>
+      <div class="check-text"><strong>5. Have we tested for bias?</strong> The AI has been checked for equitable performance across the communities we serve.</div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this,'ck6')">
+      <div class="check-box" id="ck6">✓</div>
+      <div class="check-text"><strong>6. Is there a human override?</strong> For every consequential AI decision, a human can review, challenge, and override it.</div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this,'ck7')">
+      <div class="check-box" id="ck7">✓</div>
+      <div class="check-text"><strong>7. What is the environmental cost?</strong> We have considered the energy consumption and found it proportionate to the benefit.</div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this,'ck8')">
+      <div class="check-box" id="ck8">✓</div>
+      <div class="check-text"><strong>8. Are we ready for the responsibility?</strong> Moving deeper requires accepting greater responsibility toward our community — we have discussed this as a team.</div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+  <div class="q-block">
+    <div class="q-label">📝 Which questions can you answer clearly right now — and which do you still need to work out?</div>
+    <textarea id="cl1" placeholder="I can clearly answer questions… I still need to work out…" oninput="autosave(); checkCompletion()"></textarea>
+  </div>
+  <div class="q-block">
+    <div class="q-label">⚖️ What is one ethical commitment you will make about how you use or build AI in your work?</div>
+    <div class="q-hint">Small and specific is better than big and vague</div>
+    <textarea id="cl2" placeholder="I commit to… because in our context this matters most." oninput="autosave()"></textarea>
+  </div>
+  <div class="completion-banner" id="completionBanner">
+    <h3>✓ Module 6 complete — and so is the course! 🤖</h3>
+    <p>You've completed all six modules. Download your responses and return to the course page to complete your post-check and course reflection.</p>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveAndExport()">↓ Save as PDF</button>
+    <button class="btn btn-ghost" onclick="showTab(1)">← Back</button>
+  </div>
+</div>
+<div class="pdf-overlay" id="pdfOverlay">
+  <div class="pdf-toolbar">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEcAAABkCAMAAADjVt21AAAACXBIWXMAAAsSAAALEgHS3X78AAAAM1BMVEVHcExI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JsXaIzrAAAAEHRSTlMAMCBAYBDggMDwkNCgULBwaiguQQAAAWtJREFUWMPt2G1ugzAMBuCGfDmBdr7/aYdUdYUBwdjvtvyYD/BIMY5jc7v1GCGLIvgTh1gaY3UQZ46UI8RhLkfSRWeWPjAOM0WMw8VhHC4B4zAHkMMO5JQB4/AIcjiDnHWKDA6BHPYgh0AODyCngpwEchYHszkB5FSQQyBnBDn87/yKM3ZWP7Wz+zX01X9qX/2Z+nq/qK/3PXc1/6DmMdfTvAqan0HzPGa/2DnTn+1fkH2wvZ+29uW0SIpXb+T31Ko7afj1gUtUKY4aLV0cw9Tu6bKI03kXFSi5HHz3+xXmUJmLUJ7qkOQNWVgwrE21P78hD03BnD2g4oJpzynygrmY6tj41Ns2FhUFsxeTpmDEqU7mZ/0ZkJdU6eyl2jqkmhx2IIdAzrajadeBiHE21wyxEJicB8j5ds0gm5fJWafa4KyumWWHm0DOMtWgfwk2Z9HRbM471Tbn3dGMzldHszoEcl6pztZQj9U/GJ/PFzeemPqY1wAAAABJRU5ErkJggg==" alt="ERUA" class="pdf-toolbar-logo">
+    <div class="pdf-toolbar-text"><strong>Save as PDF:</strong> Click the button → a print dialog will open → set the destination/output to <em>"Save as PDF"</em> → enable background graphics if prompted → save.</div>
+    <div class="pdf-toolbar-actions">
+      <button class="btn-print" onclick="window.print()">🖨 Save as PDF</button>
+      <button class="btn-close-pdf" onclick="closePDF()">✕ Close</button>
+    </div>
+  </div>
+  <div class="pdf-content" id="pdfContent"></div>
+</div>
+<div class="toast" id="toast">✓ Draft saved</div>
+<div class="footer-note">Strategic AI Integration for Social Ventures · ERUA e-Course Programme</div>
+<script>
+  const fields={0:['w1','w2'],1:['i1','i2','i3','i4','i5','i6','i7','i8'],2:['cl1','cl2']}; const labels={'w1':'Where my venture currently sits in AI integration','w2':'What shift would move me one level deeper','i1':'1. Data & Network Effects — what this means for our venture','i2':'2. Trust — would our beneficiaries trust AI?','i3':'3. Augmentation vs Automation — empower or replace?','i4':'4. Ethics & Algorithms — bias or fairness risk','i5':'5. Cultural Bias — whose values are in our AI tools?','i6':'6. Decision Making — decisions AI should never make','i7':'7. Environmental Impact — is our AI use proportionate?','i8':'8. Predictability — risk of over-relying on AI predictions','cl1':'Which checklist questions I can answer and which I still need to work out','cl2':'One ethical commitment I will make about AI in my work'}; const panelTitles=['Activity 1: What Shift Would Move You Deeper?','Activity 2: Critical Impacts Self-Assessment','Activity 3: Responsible AI Checklist'];
+  let currentTab=0,saveTimer=null;
+  function showTab(i){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+i).classList.add('active');document.getElementById('tab-'+i).classList.add('active');currentTab=i;document.getElementById('progressBar').style.width=((i+1)/3*100)+'%';window.scrollTo({top:0,behavior:'smooth'});}
+  function autosave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>showToast('✓ Draft saved'),800);}
+  function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+  
+  const checked = {};
+  function toggleCheck(el, id) {
+    el.classList.toggle('checked');
+    checked[id] = el.classList.contains('checked');
+    autosave();
+  }
+  function checkCompletion() {
+    if(document.getElementById('cl1')?.value.trim()){
+      document.getElementById('completionBanner').classList.add('show');
+      document.getElementById('tab-2').classList.add('done');
+    }
+  }
+  function saveAndExport(){
+    const allIds=Object.values(fields).flat();
+    if(!allIds.some(id=>document.getElementById(id)?.value.trim())){showToast('Fill in some answers first');return;}
+    const date=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    let sectionsHTML='';
+    Object.entries(fields).forEach(([tab,ids])=>{const items=ids.map(id=>{const v=document.getElementById(id)?.value.trim();if(!v)return '';return `<div class="pdf-answer-block"><div class="pdf-answer-label">${labels[id]||id}</div><div class="pdf-answer-text">${v.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`;
+    }).filter(Boolean).join('');if(items)sectionsHTML+=`<div class="pdf-section-heading">${panelTitles[tab]}</div>${items}`;
+    });
+    
+    // Add checklist state to PDF
+    const checklistItems = [
+      {id:'ck1', text:'1. Who benefits and who bears the risk — I have honestly mapped this'},
+      {id:'ck2', text:'2. Whose data and on whose terms — I know the consent conditions'},
+      {id:'ck3', text:'3. Can it be explained — I can explain decisions to beneficiaries'},
+      {id:'ck4', text:'4. Who is accountable — a named person is responsible'},
+      {id:'ck5', text:'5. Tested for bias — checked for equitable performance'},
+      {id:'ck6', text:'6. Human override exists for consequential decisions'},
+      {id:'ck7', text:'7. Environmental cost considered and proportionate'},
+      {id:'ck8', text:'8. Team has discussed responsibility of going deeper'}
+    ];
+    const checklistHTML = checklistItems.map(item => {
+      const isChecked = document.getElementById(item.id)?.closest('.checklist-item')?.classList.contains('checked');
+      return `<div class="pdf-answer-block"><div class="pdf-answer-label">${isChecked ? '✅' : '⬜'} ${item.text}</div></div>`;
+    }).join('');
+    if (checklistHTML) sectionsHTML += '<div class="pdf-section-heading">Responsible AI Checklist</div>' + checklistHTML;
+    document.getElementById('pdfContent').innerHTML=`<div class="pdf-header"><div class="pdf-header-text"><div class="pdf-course-tag">ERUA e-Course · Strategic AI Integration for Social Ventures</div><div class="pdf-title">Module 6 — Critical Impacts & Ethics</div><div class="pdf-meta">${date}</div></div><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEcAAABkCAMAAADjVt21AAAACXBIWXMAAAsSAAALEgHS3X78AAAAM1BMVEVHcExI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JsXaIzrAAAAEHRSTlMAMCBAYBDggMDwkNCgULBwaiguQQAAAWtJREFUWMPt2G1ugzAMBuCGfDmBdr7/aYdUdYUBwdjvtvyYD/BIMY5jc7v1GCGLIvgTh1gaY3UQZ46UI8RhLkfSRWeWPjAOM0WMw8VhHC4B4zAHkMMO5JQB4/AIcjiDnHWKDA6BHPYgh0AODyCngpwEchYHszkB5FSQQyBnBDn87/yKM3ZWP7Wz+zX01X9qX/2Z+nq/qK/3PXc1/6DmMdfTvAqan0HzPGa/2DnTn+1fkH2wvZ+29uW0SIpXb+T31Ko7afj1gUtUKY4aLV0cw9Tu6bKI03kXFSi5HHz3+xXmUJmLUJ7qkOQNWVgwrE21P78hD03BnD2g4oJpzynygrmY6tj41Ns2FhUFsxeTpmDEqU7mZ/0ZkJdU6eyl2jqkmhx2IIdAzrajadeBiHE21wyxEJicB8j5ds0gm5fJWafa4KyumWWHm0DOMtWgfwk2Z9HRbM471Tbn3dGMzldHszoEcl6pztZQj9U/GJ/PFzeemPqY1wAAAABJRU5ErkJggg==" alt="ERUA" class="pdf-header-logo"></div>${sectionsHTML}<div class="pdf-footer"><span>Strategic AI Integration for Social Ventures · ERUA e-Course Programme</span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEcAAABkCAMAAADjVt21AAAACXBIWXMAAAsSAAALEgHS3X78AAAAM1BMVEVHcExI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JsXaIzrAAAAEHRSTlMAMCBAYBDggMDwkNCgULBwaiguQQAAAWtJREFUWMPt2G1ugzAMBuCGfDmBdr7/aYdUdYUBwdjvtvyYD/BIMY5jc7v1GCGLIvgTh1gaY3UQZ46UI8RhLkfSRWeWPjAOM0WMw8VhHC4B4zAHkMMO5JQB4/AIcjiDnHWKDA6BHPYgh0AODyCngpwEchYHszkB5FSQQyBnBDn87/yKM3ZWP7Wz+zX01X9qX/2Z+nq/qK/3PXc1/6DmMdfTvAqan0HzPGa/2DnTn+1fkH2wvZ+29uW0SIpXb+T31Ko7afj1gUtUKY4aLV0cw9Tu6bKI03kXFSi5HHz3+xXmUJmLUJ7qkOQNWVgwrE21P78hD03BnD2g4oJpzynygrmY6tj41Ns2FhUFsxeTpmDEqU7mZ/0ZkJdU6eyl2jqkmhx2IIdAzrajadeBiHE21wyxEJicB8j5ds0gm5fJWafa4KyumWWHm0DOMtWgfwk2Z9HRbM471Tbn3dGMzldHszoEcl6pztZQj9U/GJ/PFzeemPqY1wAAAABJRU5ErkJggg==" alt="ERUA" class="pdf-footer-logo"></div>`;
+    document.getElementById('pdfOverlay').classList.add('show');
+    document.getElementById('pdfOverlay').scrollTop=0;
+  }
+  function closePDF(){document.getElementById('pdfOverlay').classList.remove('show');}
+</script></body></html>
