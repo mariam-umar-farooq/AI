@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 — AI as a Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F0F4FF;--surface:#FFFFFF;--ink:#1A1A2E;--ink-light:#5A6080;--accent:#2D3A8C;--accent-light:#DEE3F8;--border:#D8DCF0;--amber:#D4870A;--amber-light:#FFF3CD;--warn:#E07A5F;--warn-light:#FDE8E3;--green:#2D6A4F;--green-light:#D8F3DC;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--ink);min-height:100vh;}
+  .tab-nav{display:flex;background:var(--surface);border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:100;}
+  .tab-nav::-webkit-scrollbar{display:none;}
+  .tab-btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:14px 18px;border:none;background:none;cursor:pointer;color:var(--ink-light);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;display:flex;align-items:center;gap:6px;}
+  .tab-btn:hover{color:var(--accent);}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .2s;}
+  .tab-btn.done .tab-dot,.tab-btn.active .tab-dot{background:var(--accent);}
+  .panel{display:none;padding:32px 24px 60px;max-width:680px;margin:0 auto;}
+  .panel.active{display:block;animation:fadeUp .4s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .panel-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--accent-light);padding:4px 10px;border-radius:4px;margin-bottom:14px;}
+  .panel h2{font-family:'DM Serif Display',serif;font-size:clamp(22px,4vw,30px);line-height:1.2;margin-bottom:10px;}
+  .panel-intro{font-size:14px;color:var(--ink-light);line-height:1.65;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+  .time-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--ink-light);background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:3px 10px;margin-bottom:20px;}
+  .q-block{margin-bottom:22px;}
+  .q-label{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;line-height:1.4;}
+  .q-hint{font-size:12px;color:var(--ink-light);margin-bottom:8px;line-height:1.5;font-style:italic;}
+  textarea{width:100%;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;color:var(--ink);background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;resize:vertical;min-height:90px;outline:none;transition:border-color .2s,box-shadow .2s;}
+  textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,58,140,.08);}
+  textarea::placeholder{color:#C5BFB9;}
+  .section-divider{border:none;border-top:1px solid var(--border);margin:28px 0;}
+  .callout{background:var(--accent-light);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;font-size:13px;line-height:1.6;color:var(--ink);margin:16px 0 24px;}
+  .callout.amber{background:var(--amber-light);border-color:var(--amber);}
+  .callout.green{background:var(--green-light);border-color:var(--green);}
+  .callout strong{font-weight:600;}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:11px 20px;border-radius:9px;border:none;cursor:pointer;transition:all .2s;}
+  .btn-primary{background:var(--accent);color:white;}.btn-primary:hover{background:#1E2870;transform:translateY(-1px);}
+  .btn-next{background:var(--ink);color:white;}.btn-next:hover{background:#333;}
+  .btn-ghost{background:transparent;color:var(--ink-light);border:1.5px solid var(--border);}.btn-ghost:hover{border-color:var(--ink-light);color:var(--ink);}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--ink);color:white;font-size:13px;font-weight:500;padding:10px 20px;border-radius:99px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .progress-bar-wrap{height:3px;background:var(--border);width:100%;}
+  .progress-bar-fill{height:100%;background:var(--accent);transition:width .4s ease;}
+  .completion-banner{background:var(--green-light);border:1.5px solid var(--green);border-radius:12px;padding:20px 24px;text-align:center;display:none;margin-bottom:24px;}
+  .completion-banner.show{display:block;animation:fadeUp .4s ease both;}
+  .completion-banner h3{font-family:'DM Serif Display',serif;font-size:22px;color:var(--green);margin-bottom:6px;}
+  .completion-banner p{font-size:13px;color:var(--green);line-height:1.5;}
+  .stack-layer{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:border-color .2s;}
+  .stack-layer:focus-within{border-color:var(--accent);}
+  .layer-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .layer-num{font-size:11px;font-weight:700;color:white;background:var(--accent);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .layer-name{font-size:13px;font-weight:600;color:var(--ink);}
+  .layer-example{font-size:11px;color:var(--ink-light);margin-bottom:8px;font-style:italic;}
+  .stack-layer textarea{background:var(--bg);border-color:transparent;min-height:55px;}
+  .stack-layer textarea:focus{background:var(--surface);border-color:var(--accent);box-shadow:none;}
+  .role-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;transition:border-color .2s;}
+  .role-card:focus-within{border-color:var(--accent);}
+  .role-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;margin-bottom:8px;}
+  .role-badge.supportive{background:#FFF3CD;color:#78500A;}
+  .role-badge.integral{background:#DEE3F8;color:#2D3A8C;}
+  .role-badge.core{background:#FDE8E3;color:#C0392B;}
+  .role-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+  .role-card textarea{background:var(--bg);border-color:transparent;min-height:65px;}
+  .role-card textarea:focus{background:var(--surface);border-color:var(--accent);box-shadow:none;}
+  .impact-row{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:border-color .2s;}
+  .impact-row:focus-within{border-color:var(--accent);}
+  .impact-theme{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+  .impact-question{font-size:11px;color:var(--ink-light);margin-bottom:10px;font-style:italic;}
+  .impact-row textarea{background:var(--bg);border-color:transparent;min-height:55px;font-size:12px;}
+  .impact-row textarea:focus{background:var(--surface);border-color:var(--accent);box-shadow:none;}
+  .checklist-item{display:flex;align-items:flex-start;gap:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
+  .checklist-item.checked{border-color:var(--green);background:var(--green-light);}
+  .check-box{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:12px;}
+  .checklist-item.checked .check-box{background:var(--green);border-color:var(--green);color:white;}
+  .check-text{font-size:13px;line-height:1.5;color:var(--ink);flex:1;}
+  .checklist-item.checked .check-text{color:#1B4332;}
+  .footer-note{text-align:center;font-size:11px;color:var(--ink-light);padding:20px 24px;border-top:1px solid var(--border);}
+  .pdf-overlay{display:none;position:fixed;inset:0;background:white;z-index:9999;overflow-y:auto;}
+  .pdf-overlay.show{display:block;}
+  .pdf-toolbar{background:#48F89B;color:#0D3D24;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10;border-bottom:2px solid #1AC978;}
+  .pdf-toolbar-logo{height:28px;width:auto;flex-shrink:0;}
+  .pdf-toolbar-text{font-size:12px;font-weight:500;line-height:1.4;flex:1;color:#0D3D24;}
+  .pdf-toolbar-text strong{font-weight:700;}.pdf-toolbar-text em{font-style:italic;font-weight:600;}
+  .pdf-toolbar-actions{display:flex;gap:8px;flex-shrink:0;}
+  .btn-print{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;padding:7px 14px;border-radius:7px;border:2px solid #0D3D24;background:#0D3D24;color:#48F89B;cursor:pointer;}
+  .btn-close-pdf{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 12px;border-radius:7px;border:1.5px solid rgba(13,61,36,0.4);background:transparent;color:#0D3D24;cursor:pointer;}
+  .pdf-content{max-width:680px;margin:0 auto;padding:40px 48px 60px;}
+  .pdf-header{border-bottom:2px solid #48F89B;padding-bottom:16px;margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+  .pdf-header-text{flex:1;}.pdf-header-logo{height:36px;width:auto;flex-shrink:0;}
+  .pdf-course-tag{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#1AC978;margin-bottom:6px;}
+  .pdf-title{font-family:'DM Serif Display',serif;font-size:22px;color:#1A1A1A;line-height:1.2;margin-bottom:4px;}
+  .pdf-meta{font-size:12px;color:#6B6560;}
+  .pdf-section-heading{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#1AC978;margin:24px 0 12px;padding-bottom:6px;border-bottom:1px solid #E2DDD8;}
+  .pdf-answer-block{margin-bottom:20px;page-break-inside:avoid;}
+  .pdf-answer-label{font-size:12px;font-weight:600;color:#1A1A1A;margin-bottom:6px;}
+  .pdf-answer-text{font-size:13px;color:#333;line-height:1.7;background:#F0FFF7;border-left:3px solid #48F89B;padding:10px 14px;border-radius:0 6px 6px 0;white-space:pre-wrap;word-wrap:break-word;}
+  .pdf-footer{margin-top:40px;padding-top:14px;border-top:1px solid #E2DDD8;font-size:11px;color:#6B6560;display:flex;justify-content:space-between;align-items:center;}
+  .pdf-footer-logo{height:18px;width:auto;}
+  @media print{*{visibility:hidden;}.pdf-overlay,.pdf-overlay *{visibility:visible;}.pdf-overlay{position:fixed;inset:0;overflow:visible;background:white;}.pdf-toolbar{display:none !important;}.pdf-content{padding:24px 48px;max-width:100%;}@page{margin:1.5cm;size:A4;}}
+</style>
+</head>
+<body>
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:33%"></div></div>
+<div class="tab-nav"><button class="tab-btn active" id="tab-0" onclick="showTab(0)"><span class="tab-dot"></span> 1 · Warm-up</button>
+  <button class="tab-btn " id="tab-1" onclick="showTab(1)"><span class="tab-dot"></span> 2 · Level 1 Prompt</button>
+  <button class="tab-btn " id="tab-2" onclick="showTab(2)"><span class="tab-dot"></span> 3 · Level 2 Planning</button></div>
+
+<div class="panel active" id="panel-0">
+  <div class="panel-tag">Module 4 · Activity 1 of 3</div>
+  <h2>Warm-up — Where Do You Lose Time?</h2>
+  <div class="time-badge">⏱ About 5 minutes</div>
+  <p class="panel-intro">Level 1 AI is about saving time and increasing reach without changing your impact model. Before reading the tools list, identify where time is lost in your own work.</p>
+  <div class="q-block">
+    <div class="q-label">⏰ In a typical work week, which tasks take the most time but feel the most mechanical or repetitive?</div>
+    <div class="q-hint">Think about writing, communicating, translating, organising, reporting, analysing…</div>
+    <textarea id="w1" placeholder="Tasks that drain time: e.g. writing monthly reports, translating documents, responding to standard emails…" oninput="autosave()"></textarea>
+  </div>
+  <div class="q-block">
+    <div class="q-label">🌍 Where could your venture reach more people if you had more capacity or multilingual capability?</div>
+    <textarea id="w2" placeholder="We could reach more people if we could… e.g. produce content in more languages, respond to enquiries faster…" oninput="autosave()"></textarea>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveAndExport()">↓ Save as PDF</button>
+    <button class="btn btn-next" onclick="showTab(1)">Next →</button>
+  </div>
+</div>
+
+<div class="panel" id="panel-1">
+  <div class="panel-tag">Module 4 · Activity 2 of 3</div>
+  <h2>Level 1 Prompt Exercise</h2>
+  <div class="time-badge">⏱ About 12 minutes</div>
+  <p class="panel-intro">Use the Level 1 prompt framework from the module to brainstorm AI opportunities for your venture. Open a free AI tool (ChatGPT, Claude, Gemini — any will work) and use the prompt below, then record your best ideas here.</p>
+  <div class="callout amber">
+    <strong>The prompt to use:</strong><br><br>
+    "As a social business focused on [your mission], brainstorm where AI could:<br>
+    • Save Time — what repetitive tasks drain your team?<br>
+    • Increase Reach — where could AI help you connect with more people without losing the human touch?<br><br>
+    Consider: administration, communication, data, content.<br>
+    Constraint: keep core mission unchanged and prioritise ethical tools.<br>
+    Output: share your 3 most promising ideas and 1 concern to address."
+  </div>
+  <div class="q-block">
+    <div class="q-label">💡 Your top 3 Level 1 AI ideas for your venture</div>
+    <textarea id="p1" placeholder="1. …&#10;2. …&#10;3. …" style="min-height:120px;" oninput="autosave()"></textarea>
+  </div>
+  <div class="q-block">
+    <div class="q-label">⚠️ The one concern you need to address</div>
+    <div class="q-hint">What ethical, practical, or mission-related concern came up?</div>
+    <textarea id="p2" placeholder="The concern I need to address is…" oninput="autosave()"></textarea>
+  </div>
+  <div class="q-block">
+    <div class="q-label">🛠️ Which of your top 3 ideas would you try first — and what is your next concrete step?</div>
+    <textarea id="p3" placeholder="I would try… first because… My next step is…" oninput="autosave()"></textarea>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveAndExport()">↓ Save as PDF</button>
+    <button class="btn btn-next" onclick="showTab(2)">Next →</button>
+    <button class="btn btn-ghost" onclick="showTab(0)">← Back</button>
+  </div>
+</div>
+
+<div class="panel" id="panel-2">
+  <div class="panel-tag">Module 4 · Activity 3 of 3</div>
+  <h2>Level 2 Planning & Reflection</h2>
+  <div class="time-badge">⏱ About 8 minutes</div>
+  <p class="panel-intro">Level 2 AI is beneficiary-facing — it changes how people experience your service. Before going there, plan carefully and reflect on the ethical boundary between Level 1 and Level 2.</p>
+  <div class="q-block">
+    <div class="q-label">🤖 Is there a Level 2 use case that could meaningfully extend your reach or service quality?</div>
+    <div class="q-hint">e.g. a chatbot for FAQs, smart matching of participants, multilingual service access</div>
+    <textarea id="l1" placeholder="A Level 2 AI idea for my venture could be…" oninput="autosave(); checkCompletion()"></textarea>
+  </div>
+  <div class="q-block">
+    <div class="q-label">❓ Before deploying any beneficiary-facing AI: "If this AI gives someone the wrong answer, what happens to them — and do we have a way to catch it?"</div>
+    <textarea id="l2" placeholder="If our AI got it wrong, the consequence would be… We would / wouldn't catch it because…" oninput="autosave()"></textarea>
+  </div>
+  <div class="q-block">
+    <div class="q-label">🔍 Reflection: What is your biggest concern about using AI — at Level 1 or Level 2 — in your venture's specific context?</div>
+    <textarea id="l3" placeholder="My biggest concern is… because our context involves…" oninput="autosave()"></textarea>
+  </div>
+  <div class="completion-banner" id="completionBanner">
+    <h3>✓ Module 4 complete</h3>
+    <p>You've identified Level 1 AI opportunities, run the prompt exercise, and planned a Level 2 use case with its ethical considerations.</p>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveAndExport()">↓ Save as PDF</button>
+    <button class="btn btn-ghost" onclick="showTab(1)">← Back</button>
+  </div>
+</div>
+<div class="pdf-overlay" id="pdfOverlay">
+  <div class="pdf-toolbar">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEcAAABkCAMAAADjVt21AAAACXBIWXMAAAsSAAALEgHS3X78AAAAM1BMVEVHcExI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JsXaIzrAAAAEHRSTlMAMCBAYBDggMDwkNCgULBwaiguQQAAAWtJREFUWMPt2G1ugzAMBuCGfDmBdr7/aYdUdYUBwdjvtvyYD/BIMY5jc7v1GCGLIvgTh1gaY3UQZ46UI8RhLkfSRWeWPjAOM0WMw8VhHC4B4zAHkMMO5JQB4/AIcjiDnHWKDA6BHPYgh0AODyCngpwEchYHszkB5FSQQyBnBDn87/yKM3ZWP7Wz+zX01X9qX/2Z+nq/qK/3PXc1/6DmMdfTvAqan0HzPGa/2DnTn+1fkH2wvZ+29uW0SIpXb+T31Ko7afj1gUtUKY4aLV0cw9Tu6bKI03kXFSi5HHz3+xXmUJmLUJ7qkOQNWVgwrE21P78hD03BnD2g4oJpzynygrmY6tj41Ns2FhUFsxeTpmDEqU7mZ/0ZkJdU6eyl2jqkmhx2IIdAzrajadeBiHE21wyxEJicB8j5ds0gm5fJWafa4KyumWWHm0DOMtWgfwk2Z9HRbM471Tbn3dGMzldHszoEcl6pztZQj9U/GJ/PFzeemPqY1wAAAABJRU5ErkJggg==" alt="ERUA" class="pdf-toolbar-logo">
+    <div class="pdf-toolbar-text"><strong>Save as PDF:</strong> Click the button → a print dialog will open → set the destination/output to <em>"Save as PDF"</em> → enable background graphics if prompted → save.</div>
+    <div class="pdf-toolbar-actions">
+      <button class="btn-print" onclick="window.print()">🖨 Save as PDF</button>
+      <button class="btn-close-pdf" onclick="closePDF()">✕ Close</button>
+    </div>
+  </div>
+  <div class="pdf-content" id="pdfContent"></div>
+</div>
+<div class="toast" id="toast">✓ Draft saved</div>
+<div class="footer-note">Strategic AI Integration for Social Ventures · ERUA e-Course Programme</div>
+<script>
+  const fields = {0:['w1','w2'],1:['p1','p2','p3'],2:['l1','l2','l3']};
+  const labels = {'w1':'Tasks that drain time in a typical week','w2':'Where we could reach more people with more capacity','p1':'Top 3 Level 1 AI ideas for my venture','p2':'The one concern to address','p3':'Which idea I would try first and my next step','l1':'A Level 2 AI use case for my venture','l2':'What happens if the AI gets it wrong?','l3':'My biggest concern about using AI in our context'};
+  const panelTitles = ['Activity 1: Where Do You Lose Time?','Activity 2: Level 1 Prompt Exercise','Activity 3: Level 2 Planning & Reflection'];
+  let currentTab=0, saveTimer=null;
+  function showTab(i) {
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('panel-'+i).classList.add('active');
+    document.getElementById('tab-'+i).classList.add('active');
+    currentTab=i;
+    document.getElementById('progressBar').style.width=((i+1)/3*100)+'%';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function autosave() { clearTimeout(saveTimer); saveTimer=setTimeout(()=>showToast('✓ Draft saved'),800); }
+  function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+  function checkCompletion() {
+    if(document.getElementById('l1')?.value.trim()){document.getElementById('completionBanner').classList.add('show');document.getElementById('tab-2').classList.add('done');}
+  }
+  function saveAndExport() {
+    const allIds=Object.values(fields).flat();
+    if(!allIds.some(id=>document.getElementById(id)?.value.trim())){ showToast('Fill in some answers first'); return; }
+    const date=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    let sectionsHTML='';
+    Object.entries(fields).forEach(([tab,ids])=>{
+      const items=ids.map(id=>{ const v=document.getElementById(id)?.value.trim(); if(!v) return ''; return `<div class="pdf-answer-block"><div class="pdf-answer-label">${labels[id]||id}</div><div class="pdf-answer-text">${v.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`; }).filter(Boolean).join('');
+      if(items) sectionsHTML+=`<div class="pdf-section-heading">${panelTitles[tab]}</div>${items}`;
+    });
+    document.getElementById('pdfContent').innerHTML=`<div class="pdf-header"><div class="pdf-header-text"><div class="pdf-course-tag">ERUA e-Course · Strategic AI Integration for Social Ventures</div><div class="pdf-title">Module 4 — AI as a Tool</div><div class="pdf-meta">${date}</div></div><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEcAAABkCAMAAADjVt21AAAACXBIWXMAAAsSAAALEgHS3X78AAAAM1BMVEVHcExI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JsXaIzrAAAAEHRSTlMAMCBAYBDggMDwkNCgULBwaiguQQAAAWtJREFUWMPt2G1ugzAMBuCGfDmBdr7/aYdUdYUBwdjvtvyYD/BIMY5jc7v1GCGLIvgTh1gaY3UQZ46UI8RhLkfSRWeWPjAOM0WMw8VhHC4B4zAHkMMO5JQB4/AIcjiDnHWKDA6BHPYgh0AODyCngpwEchYHszkB5FSQQyBnBDn87/yKM3ZWP7Wz+zX01X9qX/2Z+nq/qK/3PXc1/6DmMdfTvAqan0HzPGa/2DnTn+1fkH2wvZ+29uW0SIpXb+T31Ko7afj1gUtUKY4aLV0cw9Tu6bKI03kXFSi5HHz3+xXmUJmLUJ7qkOQNWVgwrE21P78hD03BnD2g4oJpzynygrmY6tj41Ns2FhUFsxeTpmDEqU7mZ/0ZkJdU6eyl2jqkmhx2IIdAzrajadeBiHE21wyxEJicB8j5ds0gm5fJWafa4KyumWWHm0DOMtWgfwk2Z9HRbM471Tbn3dGMzldHszoEcl6pztZQj9U/GJ/PFzeemPqY1wAAAABJRU5ErkJggg==" alt="ERUA" class="pdf-header-logo"></div>${sectionsHTML}<div class="pdf-footer"><span>Strategic AI Integration for Social Ventures · ERUA e-Course Programme</span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEcAAABkCAMAAADjVt21AAAACXBIWXMAAAsSAAALEgHS3X78AAAAM1BMVEVHcExI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JtI+JsXaIzrAAAAEHRSTlMAMCBAYBDggMDwkNCgULBwaiguQQAAAWtJREFUWMPt2G1ugzAMBuCGfDmBdr7/aYdUdYUBwdjvtvyYD/BIMY5jc7v1GCGLIvgTh1gaY3UQZ46UI8RhLkfSRWeWPjAOM0WMw8VhHC4B4zAHkMMO5JQB4/AIcjiDnHWKDA6BHPYgh0AODyCngpwEchYHszkB5FSQQyBnBDn87/yKM3ZWP7Wz+zX01X9qX/2Z+nq/qK/3PXc1/6DmMdfTvAqan0HzPGa/2DnTn+1fkH2wvZ+29uW0SIpXb+T31Ko7afj1gUtUKY4aLV0cw9Tu6bKI03kXFSi5HHz3+xXmUJmLUJ7qkOQNWVgwrE21P78hD03BnD2g4oJpzynygrmY6tj41Ns2FhUFsxeTpmDEqU7mZ/0ZkJdU6eyl2jqkmhx2IIdAzrajadeBiHE21wyxEJicB8j5ds0gm5fJWafa4KyumWWHm0DOMtWgfwk2Z9HRbM471Tbn3dGMzldHszoEcl6pztZQj9U/GJ/PFzeemPqY1wAAAABJRU5ErkJggg==" alt="ERUA" class="pdf-footer-logo"></div>`;
+    document.getElementById('pdfOverlay').classList.add('show');
+    document.getElementById('pdfOverlay').scrollTop=0;
+  }
+  function closePDF() { document.getElementById('pdfOverlay').classList.remove('show'); }
+</script>
+</body></html>
